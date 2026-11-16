@@ -39,9 +39,6 @@ export default async function Home() {
               {status.online ? 'THE WORLD IS OPEN' : status.online === false ? 'SERVER OFFLINE' : 'CHECKING SERVER'}
             </div>
             <p className="mb-4 text-xs font-semibold uppercase tracking-[0.28em] text-[#c1d6a4]">A place to make your own</p>
-            <h1 className="max-w-2xl text-5xl font-semibold leading-[1.02] tracking-[-0.055em] sm:text-7xl lg:text-[88px]">
-              Find your <span className="font-serif font-normal italic text-[#c1d6a4]">corner</span> of the world.
-            </h1>
             <p className="mt-6 max-w-lg text-base leading-7 text-white/65 sm:text-lg sm:leading-8">
               Welcome to Murphy Hall — a little blocky home for building, exploring, and making stories together.
             </p>
