@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="refresh" content="30">
+
+    <title>{{ server_name }}</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <main>
+        <header>
+            <h1>{{ server_name }}</h1>
+            <p>Minecraft Survival Multiplayer</p>
+        </header>
+
+        <section class="address">
+            <small>SERVER ADDRESS</small>
+            <h2>{{ server_address }}</h2>
+        </section>
+
+        <section class="info">
+            <div>
+                <span>Status</span>
+
+                {% if online %}
+                    <span class="online">Online</span>
+                {% else %}
+                    <span class="offline">Unavailable</span>
+                {% endif %}
+            </div>
+
+            <div>
+                <span>Players</span>
+                {% if online %}
+                    <span>{{ player_count }}/{{ max_players }}</span>
+                {% else %}
+                    <span>Unknown</span>
+                {% endif %}
+            </div>
+
+            <div>
+                <span>Platforms</span>
+                <span>Java & Bedrock</span>
+            </div>
+
+            <div>
+                <span>Java Port</span>
+                <span>{{ java_port }}</span>
+            </div>
+
+            <div>
+                <span>Bedrock Port</span>
+                <span>{{ bedrock_port }}</span>
+            </div>
+
+            <div>
+                <span>Version</span>
+                <span>{{ version }}</span>
+            </div>
+
+            <div>
+                <span>Game Mode</span>
+                <span>Survival</span>
+            </div>
+        </section>
+
+        <section class="players">
+            <h3>Online Players</h3>
+
+            {% if not online %}
+                <p>Player list unavailable.</p>
+            {% elif players %}
+                <ul>
+                    {% for player in players %}
+                        <li>{{ player }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No players online.</p>
+            {% endif %}
+        </section>
+
+        <footer>
+            {% if mock %}
+                <p>Development mode - mock data</p>
+            {% endif %}
+            Last updated: {{ updated }}
+        </footer>
+    </main>
+</body>
+</html>
