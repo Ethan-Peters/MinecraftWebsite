@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh Minecraft server website every 30 seconds
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=30s
+AccuracySec=1s
+Unit=minecraft-website.service
+
+[Install]
+WantedBy=timers.target

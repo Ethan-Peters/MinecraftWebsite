@@ -1,0 +1,15 @@
+[Unit]
+Description=Generate Minecraft server website
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=minecraft-website
+Group=minecraft-website
+WorkingDirectory=/opt/minecraft-website
+ExecStart=/opt/minecraft-website/.venv/bin/python /opt/minecraft-website/main.py --host 127.0.0.1 --stats-dir /opt/minecraft-server/world/stats --usercache /opt/minecraft-server/usercache.json
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/minecraft-website/build

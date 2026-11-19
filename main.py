@@ -3,6 +3,7 @@ from pathlib import Path
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from mcstatus import JavaServer
+from player_stats import get_leaderboards, get_player_stats
 import argparse
 import shutil
 
@@ -53,7 +54,7 @@ def get_server_data(host):
         }
 
 
-def build_website(data, mock=False):
+def build_website(data, mock=False, leaderboards=None, stats_configured=False):
 
     env = Environment(
         loader=FileSystemLoader(BASE_DIR / "templates"),
@@ -69,6 +70,8 @@ def build_website(data, mock=False):
         bedrock_port=BEDROCK_PORT,
         updated=datetime.now().strftime("%H:%M:%S"),
         mock=mock,
+        leaderboards=leaderboards or [],
+        stats_configured=stats_configured,
         **data
     )
 
@@ -100,11 +103,54 @@ if __name__ == "__main__":
         default="127.0.0.1"
     )
 
+    parser.add_argument(
+        "--stats-dir",
+        type=Path,
+        help="Path to the Minecraft world/stats directory"
+    )
+
+    parser.add_argument(
+        "--usercache",
+        type=Path,
+        help="Path to the Minecraft server's usercache.json"
+    )
+
     args = parser.parse_args()
+
+    if bool(args.stats_dir) != bool(args.usercache):
+        parser.error("--stats-dir and --usercache must be provided together")
 
     if args.mock:
         data = get_mock_data()
     else:
         data = get_server_data(args.host)
 
-    build_website(data, mock=args.mock)
+    if args.stats_dir and args.usercache:
+        stats_directory = args.stats_dir
+        usercache_path = args.usercache
+        stats_configured = True
+    elif args.mock:
+        stats_directory = BASE_DIR / "mock_data" / "stats"
+        usercache_path = BASE_DIR / "mock_data" / "usercache.json"
+        stats_configured = True
+    else:
+        stats_directory = None
+        usercache_path = None
+        stats_configured = False
+
+    leaderboards = []
+    if stats_configured:
+        player_stats = get_player_stats(usercache_path, stats_directory)
+        leaderboards = get_leaderboards(player_stats)
+    else:
+        print(
+            "Player statistics not loaded. Provide --stats-dir and "
+            "--usercache to enable leaderboards."
+        )
+
+    build_website(
+        data,
+        mock=args.mock,
+        leaderboards=leaderboards,
+        stats_configured=stats_configured
+    )
