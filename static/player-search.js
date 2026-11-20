@@ -6,14 +6,17 @@
     const playerName = document.getElementById("player-search-name");
     const playerUsername = document.getElementById("player-search-username");
     const statistics = document.getElementById("player-search-statistics");
+    const refreshError = document.getElementById("player-search-refresh-error");
 
     if (!input || !status || !results || !details
-        || !playerName || !playerUsername || !statistics) {
+        || !playerName || !playerUsername || !statistics || !refreshError
+        || !window.MinecraftText) {
         return;
     }
 
     let players = [];
     let selectedUuid = null;
+    let refreshing = false;
     const urlParameters = new URLSearchParams(window.location.search);
     const initialQuery = urlParameters.get("playerSearch") || "";
     const initialUuid = urlParameters.get("player") || "";
@@ -39,34 +42,6 @@
         window.history.replaceState(null, "", nextUrl);
     }
 
-    function appendFormattedName(parent, parts) {
-        for (const part of parts) {
-            const span = document.createElement("span");
-            if (typeof part.color === "string"
-                && /^#[0-9a-f]{6}$/i.test(part.color)) {
-                span.style.color = part.color;
-            }
-            if (part.bold) {
-                span.style.fontWeight = "bold";
-            }
-            if (part.italic) {
-                span.style.fontStyle = "italic";
-            }
-            const decorations = [];
-            if (part.underline) {
-                decorations.push("underline");
-            }
-            if (part.strikethrough) {
-                decorations.push("line-through");
-            }
-            if (decorations.length) {
-                span.style.textDecoration = decorations.join(" ");
-            }
-            span.textContent = part.text;
-            parent.appendChild(span);
-        }
-    }
-
     function clearDetails() {
         details.hidden = true;
         playerName.replaceChildren();
@@ -76,7 +51,7 @@
 
     function displayDetails(player) {
         playerName.replaceChildren();
-        appendFormattedName(playerName, player.display_name_parts);
+        window.MinecraftText.append(playerName, player.display_name_parts);
         playerUsername.textContent = `Minecraft username: ${player.username}`;
         statistics.replaceChildren();
 
@@ -139,7 +114,7 @@
 
             const name = document.createElement("span");
             name.className = "player-search-result-name";
-            appendFormattedName(name, player.display_name_parts);
+            window.MinecraftText.append(name, player.display_name_parts);
 
             const username = document.createElement("span");
             username.className = "player-search-result-username";
@@ -172,35 +147,64 @@
         displayResults(input.value);
     });
 
-    fetch(new URL("players.json", document.baseURI), {cache: "no-store"})
-        .then((response) => {
-            if (!response.ok) {
-                throw new Error(`Player data request failed: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then((data) => {
-            if (!Array.isArray(data)) {
-                throw new TypeError("Player data must be a JSON array.");
-            }
+    function refreshPlayerData(initialLoad = false) {
+        if (refreshing) {
+            return;
+        }
+        refreshing = true;
 
-            players = data;
-            input.value = initialQuery;
-            input.disabled = false;
-            displayResults(initialQuery);
+        fetch(new URL("players.json", document.baseURI), {cache: "no-store"})
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`Player data request failed: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then((data) => {
+                if (!Array.isArray(data)) {
+                    throw new TypeError("Player data must be a JSON array.");
+                }
 
-            const selectedPlayer = players.find(
-                (player) => player.uuid === initialUuid
-            );
-            if (selectedPlayer) {
-                selectPlayer(selectedPlayer, false);
-            } else if (initialUuid) {
-                status.textContent = "The selected player is no longer available. Choose a search result.";
-            }
-        })
-        .catch((error) => {
-            console.error("Could not load player statistics.", error);
-            status.textContent = "Could not load player statistics. Please refresh the page.";
-            input.disabled = true;
-        });
+                players = data;
+                if (initialLoad) {
+                    input.value = initialQuery;
+                    selectedUuid = initialUuid || null;
+                }
+                input.disabled = false;
+
+                refreshError.hidden = true;
+                refreshError.textContent = "";
+                displayResults(input.value);
+
+                const selectedPlayer = players.find(
+                    (player) => player.uuid === selectedUuid
+                );
+                if (selectedPlayer) {
+                    displayDetails(selectedPlayer);
+                } else if (selectedUuid) {
+                    selectedUuid = null;
+                    clearDetails();
+                    updateUrl(input.value, null);
+                    displayResults(input.value);
+                    status.textContent = "The selected player is no longer available. Choose a search result.";
+                }
+            })
+            .catch((error) => {
+                console.error("Could not refresh player statistics.", error);
+                if (initialLoad) {
+                    status.textContent = "Could not load player statistics. Please refresh the page.";
+                    input.disabled = true;
+                    return;
+                }
+
+                refreshError.hidden = false;
+                refreshError.textContent = "Could not refresh player statistics; showing the last available data.";
+            })
+            .finally(() => {
+                refreshing = false;
+            });
+    }
+
+    refreshPlayerData(true);
+    window.setInterval(() => refreshPlayerData(), 30000);
 }());

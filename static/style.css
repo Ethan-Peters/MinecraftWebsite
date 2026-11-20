@@ -200,6 +200,10 @@ footer {
     min-height: 1.2em;
 }
 
+.refresh-error {
+    color: #db7777;
+}
+
 .player-search-results {
     border: 1px solid #303630;
     list-style: none;

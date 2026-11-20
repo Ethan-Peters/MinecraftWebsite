@@ -5,10 +5,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="refresh" content="30">
 
     <title>{{ server_name }}</title>
     <link rel="stylesheet" href="style.css">
+    <script defer src="minecraft-text.js"></script>
+    <script defer src="status-refresh.js"></script>
     {% if stats_configured %}
         <script defer src="player-search.js"></script>
     {% endif %}
@@ -31,18 +32,18 @@
                 <span>Status</span>
 
                 {% if online %}
-                    <span class="online">Online</span>
+                    <span id="server-status" class="online">Online</span>
                 {% else %}
-                    <span class="offline">Unavailable</span>
+                    <span id="server-status" class="offline">Unavailable</span>
                 {% endif %}
             </div>
 
             <div>
                 <span>Players</span>
                 {% if online %}
-                    <span>{{ player_count }}/{{ max_players }}</span>
+                    <span id="player-count">{{ player_count }}/{{ max_players }}</span>
                 {% else %}
-                    <span>Unknown</span>
+                    <span id="player-count">Unknown</span>
                 {% endif %}
             </div>
 
@@ -63,7 +64,7 @@
 
             <div>
                 <span>Version</span>
-                <span>{{ version }}</span>
+                <span id="server-version">{{ version }}</span>
             </div>
 
             <div>
@@ -71,21 +72,24 @@
                 <span>Survival</span>
             </div>
         </section>
+        <p id="status-refresh-error" class="refresh-error" role="status" hidden></p>
 
         <section class="players">
             <h3>Online Players</h3>
 
-            {% if not online %}
-                <p>Player list unavailable.</p>
-            {% elif players %}
-                <ul>
-                    {% for player in players %}
-                    <li>{{ minecraft_text(player.name_parts) }}</li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p>No players online.</p>
-            {% endif %}
+            <div id="online-player-content">
+                {% if not online %}
+                    <p>Player list unavailable.</p>
+                {% elif players %}
+                    <ul>
+                        {% for player in players %}
+                        <li>{{ minecraft_text(player.name_parts) }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No players online.</p>
+                {% endif %}
+            </div>
         </section>
 
         {% if stats_configured %}
@@ -97,7 +101,7 @@
             {% if mock %}
                 <p>Development mode - mock data</p>
             {% endif %}
-            Last updated: {{ updated }}
+            Last updated: <span id="last-updated">{{ updated }}</span>
         </footer>
     </main>
 </body>

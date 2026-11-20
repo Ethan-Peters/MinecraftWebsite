@@ -60,6 +60,33 @@ def build_player_search_data(players):
     return search_players
 
 
+def build_status_data(data, leaderboards, updated):
+    return {
+        "online": data["online"],
+        "player_count": data["player_count"],
+        "max_players": data["max_players"],
+        "version": data["version"],
+        "players": [
+            {"name_parts": player["name_parts"]}
+            for player in data["players"]
+        ],
+        "leaderboards": [
+            {
+                "key": leaderboard["key"],
+                "players": [
+                    {
+                        "name_parts": player["name_parts"],
+                        "value": player[leaderboard["key"]]
+                    }
+                    for player in leaderboard["players"]
+                ]
+            }
+            for leaderboard in leaderboards or []
+        ],
+        "updated": updated
+    }
+
+
 def get_server_data(host):
     try:
         server = JavaServer(host, JAVA_PORT)
@@ -93,6 +120,7 @@ def build_website(
     search_players=None
 ):
 
+    updated = datetime.now().strftime("%H:%M:%S")
     env = Environment(
         loader=FileSystemLoader(BASE_DIR / "templates"),
         autoescape=select_autoescape(["html"])
@@ -105,7 +133,7 @@ def build_website(
         server_address=SERVER_ADDRESS,
         java_port=JAVA_PORT,
         bedrock_port=BEDROCK_PORT,
-        updated=datetime.now().strftime("%H:%M:%S"),
+        updated=updated,
         mock=mock,
         leaderboards=leaderboards or [],
         stats_configured=stats_configured,
@@ -123,6 +151,14 @@ def build_website(
     temporary_search_data.write_text(search_data, encoding="utf-8")
     temporary_search_data.replace(output / "players.json")
 
+    status_data = json.dumps(
+        build_status_data(data, leaderboards, updated),
+        ensure_ascii=False
+    )
+    temporary_status_data = output / "status.tmp"
+    temporary_status_data.write_text(status_data, encoding="utf-8")
+    temporary_status_data.replace(output / "status.json")
+
     temporary = output / "index.tmp"
     temporary.write_text(html, encoding="utf-8")
     temporary.replace(output / "index.html")
@@ -134,6 +170,14 @@ def build_website(
     shutil.copyfile(
         BASE_DIR / "static/player-search.js",
         output / "player-search.js"
+    )
+    shutil.copyfile(
+        BASE_DIR / "static/status-refresh.js",
+        output / "status-refresh.js"
+    )
+    shutil.copyfile(
+        BASE_DIR / "static/minecraft-text.js",
+        output / "minecraft-text.js"
     )
 
     print("Website generated successfully!")

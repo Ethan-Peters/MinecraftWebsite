@@ -1,7 +1,7 @@
 import json
 import unittest
 
-from main import build_player_search_data
+from main import build_player_search_data, build_status_data
 from minecraft_text import format_minecraft_text
 from player_stats import STATISTICS
 
@@ -39,6 +39,30 @@ class PlayerSearchDataTests(unittest.TestCase):
             STATISTICS[next(iter(STATISTICS))]
         )
         self.assertNotIn("§", json.dumps(search_data, ensure_ascii=False))
+
+    def test_status_payload_includes_online_players_and_leaderboards(self):
+        name_parts = [{"text": "Builder", "color": "#55FF55"}]
+        data = {
+            "online": True,
+            "player_count": 1,
+            "max_players": 20,
+            "version": "Test",
+            "players": [{"name_parts": name_parts}]
+        }
+        leaderboards = [{
+            "key": "deaths",
+            "players": [{
+                "name_parts": name_parts,
+                "deaths": 3
+            }]
+        }]
+
+        status = build_status_data(data, leaderboards, "12:34:56")
+
+        self.assertTrue(status["online"])
+        self.assertEqual(status["players"][0]["name_parts"], name_parts)
+        self.assertEqual(status["leaderboards"][0]["players"][0]["value"], 3)
+        self.assertEqual(status["updated"], "12:34:56")
 
 
 if __name__ == "__main__":

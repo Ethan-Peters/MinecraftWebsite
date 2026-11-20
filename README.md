@@ -39,7 +39,9 @@ nickname. It covers every player with a stats JSON file, including offline
 players, and displays all tracked statistics for a selection. The generated
 `build/players.json` contains this search data and is publicly accessible when
 the site is public. The search query and selected player are stored in the URL
-so they survive the page's 30-second refresh and can be shared.
+so they survive a manual reload and can be shared. The browser refreshes
+status and player data in place every 30 seconds; active searches are not
+interrupted.
 
 ## Deploy on a Linux VPS
 
@@ -134,5 +136,8 @@ Minecraft server directory or the project root. Add TLS using your VPS's
 existing HTTPS setup if the site is public. The page makes player names and
 statistics public, so only expose it if that is appropriate for your server.
 
-The status and page are regenerated every 30 seconds, but statistics change
-only after Minecraft writes updated player-stat files during its save cycle.
+The generator refreshes the static data files every 30 seconds. Open pages poll
+those files and update status, online players, leaderboards, and selected
+player statistics in place without a full-page reload. Minecraft statistics
+change only after the server writes updated player-stat files during its save
+cycle.

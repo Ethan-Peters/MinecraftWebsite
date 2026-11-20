@@ -9,7 +9,7 @@
     {% else %}
         <div class="leaderboard-grid">
             {% for leaderboard in leaderboards %}
-                <article class="leaderboard">
+                <article class="leaderboard" data-leaderboard-key="{{ leaderboard.key }}">
                     <h3>{{ leaderboard.title }}</h3>
                     <ol>
                         {% for player in leaderboard.players %}
