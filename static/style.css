@@ -161,6 +161,126 @@ footer {
     margin-left: 12px;
 }
 
+.player-search {
+    margin-top: 38px;
+}
+
+.player-search > h2 {
+    color: #fff;
+    font-size: 20px;
+    letter-spacing: 2px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.player-search > label {
+    color: #929b92;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.player-search > input {
+    background: #191e19;
+    border: 1px solid #3c483b;
+    border-radius: 0;
+    color: #dedfde;
+    font: inherit;
+    padding: 12px;
+    width: 100%;
+}
+
+.player-search > input:focus {
+    border-color: #9dca85;
+    outline: 2px solid #9dca85;
+    outline-offset: 2px;
+}
+
+.player-search-status {
+    color: #929b92;
+    min-height: 1.2em;
+}
+
+.player-search-results {
+    border: 1px solid #303630;
+    list-style: none;
+    margin: 0 0 20px;
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.player-search-results li + li {
+    border-top: 1px solid #303630;
+}
+
+.player-search-result {
+    align-items: center;
+    background: #191e19;
+    border: 0;
+    color: #dedfde;
+    cursor: pointer;
+    display: flex;
+    font: inherit;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px;
+    text-align: left;
+    width: 100%;
+}
+
+.player-search-result:hover,
+.player-search-result[aria-pressed="true"] {
+    background: #242d24;
+}
+
+.player-search-result:focus-visible {
+    outline: 2px solid #9dca85;
+    outline-offset: -2px;
+}
+
+.player-search-result-name {
+    overflow-wrap: anywhere;
+}
+
+.player-search-result-username,
+#player-search-username {
+    color: #929b92;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.player-search-details {
+    background: #191e19;
+    border: 1px solid #303630;
+    margin-top: 20px;
+    padding: 16px;
+}
+
+.player-search-details h3 {
+    color: #9dca85;
+    margin-top: 0;
+    overflow-wrap: anywhere;
+}
+
+.player-search-details dl {
+    display: grid;
+    gap: 0 20px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    margin: 0;
+}
+
+.player-search-details dt,
+.player-search-details dd {
+    border-bottom: 1px solid #303630;
+    margin: 0;
+    padding: 9px 0;
+}
+
+.player-search-details dd {
+    color: #9dca85;
+    text-align: right;
+}
+
 @media (max-width: 520px) {
     body {
         padding: 32px 16px;
@@ -168,5 +288,15 @@ footer {
 
     h1 {
         font-size: 28px;
+    }
+
+    .player-search-result {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .player-search-details dl {
+        grid-template-columns: minmax(0, 1fr) auto;
     }
 }

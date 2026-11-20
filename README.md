@@ -34,6 +34,13 @@ Nicknames are displayed in both the online-player list and leaderboards.
 Legacy and RGB colors, bold, italic, underline, strikethrough, and reset codes
 are rendered; obfuscated formatting is omitted.
 
+The generated site includes a client-side player search by username or
+nickname. It covers every player with a stats JSON file, including offline
+players, and displays all tracked statistics for a selection. The generated
+`build/players.json` contains this search data and is publicly accessible when
+the site is public. The search query and selected player are stored in the URL
+so they survive the page's 30-second refresh and can be shared.
+
 ## Deploy on a Linux VPS
 
 The recommended setup is to run the generator locally on the VPS every 30

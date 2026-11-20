@@ -1,10 +1,12 @@
 
 from pathlib import Path
 from datetime import datetime
+import json
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from mcstatus import JavaServer
 from minecraft_text import format_minecraft_text
 from player_stats import (
+    STATISTICS,
     get_leaderboards,
     get_online_player_displays,
     get_player_names,
@@ -35,6 +37,29 @@ def get_mock_data():
     }
 
 
+def build_player_search_data(players):
+    search_players = []
+    for player in players:
+        name_parts = player.get("name_parts")
+        if name_parts is None:
+            name_parts = format_minecraft_text(player["name"])
+
+        search_players.append({
+            "uuid": player["uuid"],
+            "username": player["username"],
+            "display_name_parts": name_parts,
+            "search_name": "".join(
+                part["text"] for part in name_parts
+            ),
+            "stats": [
+                {"label": title, "value": player[key]}
+                for key, title in STATISTICS.items()
+            ]
+        })
+
+    return search_players
+
+
 def get_server_data(host):
     try:
         server = JavaServer(host, JAVA_PORT)
@@ -60,7 +85,13 @@ def get_server_data(host):
         }
 
 
-def build_website(data, mock=False, leaderboards=None, stats_configured=False):
+def build_website(
+    data,
+    mock=False,
+    leaderboards=None,
+    stats_configured=False,
+    search_players=None
+):
 
     env = Environment(
         loader=FileSystemLoader(BASE_DIR / "templates"),
@@ -84,6 +115,14 @@ def build_website(data, mock=False, leaderboards=None, stats_configured=False):
     output = BASE_DIR / "build"
     output.mkdir(exist_ok=True)
 
+    search_data = json.dumps(
+        build_player_search_data(search_players or []),
+        ensure_ascii=False
+    )
+    temporary_search_data = output / "players.tmp"
+    temporary_search_data.write_text(search_data, encoding="utf-8")
+    temporary_search_data.replace(output / "players.json")
+
     temporary = output / "index.tmp"
     temporary.write_text(html, encoding="utf-8")
     temporary.replace(output / "index.html")
@@ -91,6 +130,10 @@ def build_website(data, mock=False, leaderboards=None, stats_configured=False):
     shutil.copyfile(
         BASE_DIR / "static/style.css",
         output / "style.css"
+    )
+    shutil.copyfile(
+        BASE_DIR / "static/player-search.js",
+        output / "player-search.js"
     )
 
     print("Website generated successfully!")
@@ -160,16 +203,16 @@ if __name__ == "__main__":
         )
 
     leaderboards = []
+    player_stats = []
     if stats_configured:
         player_stats = get_player_stats(
             usercache_path,
             stats_directory,
             player_names=player_names
         )
+        for player in player_stats:
+            player["name_parts"] = format_minecraft_text(player["name"])
         leaderboards = get_leaderboards(player_stats)
-        for leaderboard in leaderboards:
-            for player in leaderboard["players"]:
-                player["name_parts"] = format_minecraft_text(player["name"])
     else:
         print(
             "Player statistics not loaded. Provide --stats-dir and "
@@ -187,5 +230,6 @@ if __name__ == "__main__":
         data,
         mock=args.mock,
         leaderboards=leaderboards,
-        stats_configured=stats_configured
+        stats_configured=stats_configured,
+        search_players=player_stats
     )

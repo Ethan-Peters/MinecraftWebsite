@@ -1,0 +1,36 @@
+<section class="player-search" aria-labelledby="player-search-title">
+    <h2 id="player-search-title">Find a Player</h2>
+    <label for="player-search-input">Search by username or nickname</label>
+    <input
+        id="player-search-input"
+        type="search"
+        disabled
+        autocomplete="off"
+        autocapitalize="none"
+        spellcheck="false"
+        aria-controls="player-search-results"
+        aria-describedby="player-search-status"
+    >
+    <p
+        id="player-search-status"
+        class="player-search-status"
+        role="status"
+        aria-live="polite"
+    >Loading player statistics...</p>
+    <ul
+        id="player-search-results"
+        class="player-search-results"
+        aria-label="Player search results"
+        hidden
+    ></ul>
+    <article
+        id="player-search-details"
+        class="player-search-details"
+        aria-labelledby="player-search-name"
+        hidden
+    >
+        <h3 id="player-search-name"></h3>
+        <p id="player-search-username"></p>
+        <dl id="player-search-statistics"></dl>
+    </article>
+</section>
