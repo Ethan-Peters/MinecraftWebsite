@@ -1,4 +1,5 @@
 
+{% from "minecraft_text.html" import minecraft_text %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,7 +77,7 @@
             {% elif players %}
                 <ul>
                     {% for player in players %}
-                        <li>{{ player }}</li>
+                    <li>{{ minecraft_text(player.name_parts) }}</li>
                     {% endfor %}
                 </ul>
             {% else %}

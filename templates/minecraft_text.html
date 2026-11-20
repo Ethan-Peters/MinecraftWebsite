@@ -1,0 +1,5 @@
+{% macro minecraft_text(parts) -%}
+    {%- for part in parts -%}
+        <span{% if part.color or part.bold or part.italic or part.underline or part.strikethrough %} style="{% if part.color %}color:{{ part.color }};{% endif %}{% if part.bold %}font-weight:bold;{% endif %}{% if part.italic %}font-style:italic;{% endif %}{% if part.underline or part.strikethrough %}text-decoration:{% if part.underline %}underline{% endif %}{% if part.underline and part.strikethrough %} {% endif %}{% if part.strikethrough %}line-through{% endif %};{% endif %}"{% endif %}>{{ part.text }}</span>
+    {%- endfor %}
+{%- endmacro %}

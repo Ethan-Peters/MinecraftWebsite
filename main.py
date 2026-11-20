@@ -3,7 +3,13 @@ from pathlib import Path
 from datetime import datetime
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from mcstatus import JavaServer
-from player_stats import get_leaderboards, get_player_stats
+from minecraft_text import format_minecraft_text
+from player_stats import (
+    get_leaderboards,
+    get_online_player_displays,
+    get_player_names,
+    get_player_stats
+)
 import argparse
 import shutil
 
@@ -115,10 +121,18 @@ if __name__ == "__main__":
         help="Path to the Minecraft server's usercache.json"
     )
 
+    parser.add_argument(
+        "--essentials-userdata",
+        type=Path,
+        help="Path to the Essentials userdata directory"
+    )
+
     args = parser.parse_args()
 
     if bool(args.stats_dir) != bool(args.usercache):
         parser.error("--stats-dir and --usercache must be provided together")
+    if args.essentials_userdata and not args.usercache and not args.mock:
+        parser.error("--essentials-userdata requires --usercache")
 
     if args.mock:
         data = get_mock_data()
@@ -138,15 +152,36 @@ if __name__ == "__main__":
         usercache_path = None
         stats_configured = False
 
+    player_names = {}
+    if usercache_path:
+        player_names = get_player_names(
+            usercache_path,
+            args.essentials_userdata
+        )
+
     leaderboards = []
     if stats_configured:
-        player_stats = get_player_stats(usercache_path, stats_directory)
+        player_stats = get_player_stats(
+            usercache_path,
+            stats_directory,
+            player_names=player_names
+        )
         leaderboards = get_leaderboards(player_stats)
+        for leaderboard in leaderboards:
+            for player in leaderboard["players"]:
+                player["name_parts"] = format_minecraft_text(player["name"])
     else:
         print(
             "Player statistics not loaded. Provide --stats-dir and "
             "--usercache to enable leaderboards."
         )
+
+    data["players"] = get_online_player_displays(
+        data["players"],
+        player_names
+    )
+    for player in data["players"]:
+        player["name_parts"] = format_minecraft_text(player["name"])
 
     build_website(
         data,

@@ -1,3 +1,4 @@
+{% from "minecraft_text.html" import minecraft_text %}
 <section class="statistics">
     <h2>Player Statistics</h2>
 
@@ -13,7 +14,7 @@
                     <ol>
                         {% for player in leaderboard.players %}
                             <li>
-                                <span class="leaderboard-player">{{ player.name }}</span>
+                                <span class="leaderboard-player">{{ minecraft_text(player.name_parts) }}</span>
                                 <span class="leaderboard-value">{{ player[leaderboard.key] }}</span>
                             </li>
                         {% endfor %}

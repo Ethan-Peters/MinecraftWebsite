@@ -21,13 +21,18 @@ the server files. Pass the server's world `stats` directory and `usercache.json`
 ```sh
 python3 main.py --host 127.0.0.1 \
   --stats-dir /path/to/minecraft/world/stats \
-  --usercache /path/to/minecraft/usercache.json
+  --usercache /path/to/minecraft/usercache.json \
+  --essentials-userdata /path/to/minecraft/plugins/Essentials/userdata
 ```
 
 The generator queries the Java server for its live status and reads player
 statistics from those files. It writes the static website to `build/`, which
 can be served by a web server such as nginx. `--stats-dir` and `--usercache`
-must be supplied together.
+must be supplied together. The optional `--essentials-userdata` path maps UUID
+YAML files to player nicknames; without it, the usercache name is used.
+Nicknames are displayed in both the online-player list and leaderboards.
+Legacy and RGB colors, bold, italic, underline, strikethrough, and reset codes
+are rendered; obfuscated formatting is omitted.
 
 ## Deploy on a Linux VPS
 
@@ -63,7 +68,8 @@ mkdir -p build
 python main.py \
   --host 127.0.0.1 \
   --stats-dir /opt/minecraft-server/world/stats \
-  --usercache /opt/minecraft-server/usercache.json
+  --usercache /opt/minecraft-server/usercache.json \
+  --essentials-userdata /opt/minecraft-server/plugins/Essentials/userdata
 ```
 
 Replace the example stats and cache paths with the actual Minecraft server
@@ -77,9 +83,9 @@ The example units in `deploy/systemd/` assume the project is installed at
 `/opt/minecraft-website`, the Minecraft server at `/opt/minecraft-server`, and
 the service account is `minecraft-website`. Edit
 `minecraft-website.service` if your paths differ. Create the service account
-and grant it read/traverse access to the project, `usercache.json`, and world
-`stats/`, plus write access to the project's `build/` directory only. For
-example, on distributions with `useradd`:
+and grant it read/traverse access to the project, `usercache.json`, world
+`stats/`, and `plugins/Essentials/userdata/`, plus write access to the project's
+`build/` directory only. For example, on distributions with `useradd`:
 
 ```sh
 sudo useradd --system --user-group --no-create-home --shell /usr/sbin/nologin minecraft-website
